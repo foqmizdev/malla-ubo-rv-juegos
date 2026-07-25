@@ -12,14 +12,14 @@ document.addEventListener("DOMContentLoaded", () => {
         contenedor.innerHTML = "";
 
 
-        materias.forEach(semestre => {
+        malla.forEach(semestre => {
 
             const columna = document.createElement("div");
-            columna.className = "semestre";
+            columna.classList.add("semestre");
 
 
             const titulo = document.createElement("h2");
-            titulo.textContent = semestre.nombre;
+            titulo.textContent = "Semestre " + semestre.semestre;
 
             columna.appendChild(titulo);
 
@@ -27,9 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             semestre.ramos.forEach(ramo => {
 
-
                 const tarjeta = document.createElement("div");
-                tarjeta.className = "ramo";
+
+                tarjeta.classList.add("ramo");
 
                 tarjeta.textContent = ramo.nombre;
 
@@ -48,9 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 let bloqueado = false;
 
 
-                if (ramo.requisitos && ramo.requisitos.length > 0) {
+                if (ramo.prerrequisitos) {
 
-                    ramo.requisitos.forEach(req => {
+                    ramo.prerrequisitos.forEach(req => {
 
                         if (!aprobadas.includes(req)) {
 
@@ -64,11 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                // Agregar bloqueo visual
                 if (bloqueado && !aprobadas.includes(ramo.id)) {
 
                     tarjeta.classList.add("bloqueado");
-                    tarjeta.title = "Debes aprobar el prerrequisito primero";
+                    tarjeta.title = "Falta aprobar un prerrequisito";
 
                 }
 
@@ -77,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tarjeta.addEventListener("click", () => {
 
 
-                    // Si ya está aprobado -> quitar aprobación
+                    // Si está aprobado, quitarlo
                     if (aprobadas.includes(ramo.id)) {
 
 
@@ -87,8 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     } 
-                    
-                    // Si no está aprobado -> aprobar
+                    // Si no está aprobado, agregarlo
                     else {
 
 
@@ -105,8 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-                    // Guardar
-
                     localStorage.setItem(
                         "ramosAprobados",
                         JSON.stringify(aprobadas)
@@ -115,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     crearMalla();
-
                     actualizarProgreso();
 
 
@@ -124,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 columna.appendChild(tarjeta);
-
 
             });
 
@@ -140,14 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
     function actualizarProgreso() {
 
 
         let total = 0;
 
 
-        materias.forEach(semestre => {
+        malla.forEach(semestre => {
 
             total += semestre.ramos.length;
 
@@ -155,26 +148,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-        let porcentajeActual = 0;
-
-
-        if (total > 0) {
-
-            porcentajeActual = Math.round(
-                (aprobadas.length / total) * 100
-            );
-
-        }
+        let avance = Math.round(
+            (aprobadas.length / total) * 100
+        );
 
 
 
-        barra.style.width = porcentajeActual + "%";
+        barra.style.width = avance + "%";
 
-        porcentaje.textContent = porcentajeActual + "%";
+        porcentaje.textContent = avance + "%";
 
 
     }
-
 
 
 
