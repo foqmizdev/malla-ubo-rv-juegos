@@ -6,14 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let aprobadas = JSON.parse(localStorage.getItem("ramosAprobados")) || [];
 
+
     function crearMalla() {
 
         contenedor.innerHTML = "";
+
 
         materias.forEach(semestre => {
 
             const columna = document.createElement("div");
             columna.classList.add("semestre");
+
 
             const titulo = document.createElement("h2");
             titulo.textContent = semestre.nombre;
@@ -21,29 +24,39 @@ document.addEventListener("DOMContentLoaded", () => {
             columna.appendChild(titulo);
 
 
+
             semestre.ramos.forEach(ramo => {
 
+
                 const tarjeta = document.createElement("div");
+
                 tarjeta.classList.add("ramo");
 
                 tarjeta.textContent = ramo.nombre;
 
 
-                // Si ya está aprobado
+
+                // Estado aprobado
                 if (aprobadas.includes(ramo.id)) {
+
                     tarjeta.classList.add("aprobada");
+
                 }
 
 
-                // Revisar prerrequisitos
-                let desbloqueado = true;
+
+                // Revisar requisitos
+                let bloqueado = false;
+
 
                 if (ramo.requisitos) {
 
-                    ramo.requisitos.forEach(req => {
+                    ramo.requisitos.forEach(requisito => {
 
-                        if (!aprobadas.includes(req)) {
-                            desbloqueado = false;
+                        if (!aprobadas.includes(requisito)) {
+
+                            bloqueado = true;
+
                         }
 
                     });
@@ -51,30 +64,50 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
 
-                if (!desbloqueado) {
+
+                // Mostrar bloqueo
+                if (bloqueado && !aprobadas.includes(ramo.id)) {
+
                     tarjeta.classList.add("bloqueado");
-                    tarjeta.title = "Debes aprobar los prerrequisitos primero";
+                    tarjeta.title = "Falta aprobar un prerrequisito";
+
                 }
+
 
 
                 tarjeta.addEventListener("click", () => {
 
-                    if (!desbloqueado && !aprobadas.includes(ramo.id)) {
-                        return;
-                    }
 
 
-                    // Activar / desactivar ramo
+                    // Si ya está aprobado, quitarlo
                     if (aprobadas.includes(ramo.id)) {
 
-                        aprobadas = aprobadas.filter(id => id !== ramo.id);
 
-                    } else {
+                        aprobadas = aprobadas.filter(
+                            id => id !== ramo.id
+                        );
+
+
+                    } 
+                    
+                    // Si no está aprobado, intentar aprobar
+                    else {
+
+
+                        if (bloqueado) {
+
+                            return;
+
+                        }
+
 
                         aprobadas.push(ramo.id);
 
                     }
 
+
+
+                    // Guardar progreso
 
                     localStorage.setItem(
                         "ramosAprobados",
@@ -82,47 +115,70 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
 
+
                     crearMalla();
+
                     actualizarProgreso();
+
+
 
                 });
 
 
+
                 columna.appendChild(tarjeta);
+
 
             });
 
 
+
             contenedor.appendChild(columna);
+
 
         });
 
+
     }
+
 
 
 
     function actualizarProgreso() {
 
+
         let total = 0;
 
+
         materias.forEach(semestre => {
+
             total += semestre.ramos.length;
+
         });
 
 
-        let porcentajeActual = Math.round(
+
+        let progreso = Math.round(
             (aprobadas.length / total) * 100
         );
 
 
-        barra.style.width = porcentajeActual + "%";
-        porcentaje.textContent = porcentajeActual + "%";
+
+        barra.style.width = progreso + "%";
+
+
+        porcentaje.textContent = progreso + "%";
+
 
     }
 
 
 
+
+
     crearMalla();
+
     actualizarProgreso();
+
 
 });
