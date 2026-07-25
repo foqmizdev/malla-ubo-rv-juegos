@@ -1,91 +1,128 @@
-const contenedor = document.getElementById("malla");
+document.addEventListener("DOMContentLoaded", () => {
 
-let aprobados = JSON.parse(localStorage.getItem("aprobados")) || [];
+    const contenedor = document.getElementById("malla");
+    const barra = document.getElementById("barra-progreso");
+    const porcentaje = document.getElementById("porcentaje");
 
-function desbloqueado(ramo){
+    let aprobadas = JSON.parse(localStorage.getItem("ramosAprobados")) || [];
 
-    if(!ramo.prerrequisitos) return true;
+    function crearMalla() {
 
-    return ramo.prerrequisitos.every(r=>aprobados.includes(r));
+        contenedor.innerHTML = "";
 
-}
+        materias.forEach(semestre => {
 
-function guardar(){
+            const columna = document.createElement("div");
+            columna.classList.add("semestre");
 
-    localStorage.setItem("aprobados",JSON.stringify(aprobados));
+            const titulo = document.createElement("h2");
+            titulo.textContent = semestre.nombre;
 
-}
+            columna.appendChild(titulo);
 
-function progreso(){
 
-    let total=0;
+            semestre.ramos.forEach(ramo => {
 
-    malla.forEach(s=>total+=s.ramos.length);
+                const tarjeta = document.createElement("div");
+                tarjeta.classList.add("ramo");
 
-    let porcentaje=Math.round((aprobados.length/total)*100);
+                tarjeta.textContent = ramo.nombre;
 
-    document.getElementById("barra-progreso").style.width=porcentaje+"%";
 
-    document.getElementById("porcentaje").innerText=porcentaje+"%";
+                // Si ya está aprobado
+                if (aprobadas.includes(ramo.id)) {
+                    tarjeta.classList.add("aprobada");
+                }
 
-}
 
-function dibujar(){
+                // Revisar prerrequisitos
+                let desbloqueado = true;
 
-    contenedor.innerHTML="";
+                if (ramo.requisitos) {
 
-    malla.forEach(sem=>{
+                    ramo.requisitos.forEach(req => {
 
-        const columna=document.createElement("div");
-        columna.className="semestre";
+                        if (!aprobadas.includes(req)) {
+                            desbloqueado = false;
+                        }
 
-        const titulo=document.createElement("h2");
-        titulo.innerText="Semestre "+sem.semestre;
-
-        columna.appendChild(titulo);
-
-        sem.ramos.forEach(ramo=>{
-
-            const card=document.createElement("div");
-
-            card.className="ramo";
-
-            card.innerHTML=ramo.nombre;
-
-            if(aprobados.includes(ramo.id)){
-
-                card.classList.add("aprobado");
-
-            }else if(desbloqueado(ramo)){
-
-                card.classList.add("disponible");
-
-                card.onclick=()=>{
-
-                    aprobados.push(ramo.id);
-
-                    guardar();
-
-                    dibujar();
+                    });
 
                 }
 
-            }else{
 
-                card.classList.add("bloqueado");
+                if (!desbloqueado) {
+                    tarjeta.classList.add("bloqueado");
+                    tarjeta.title = "Debes aprobar los prerrequisitos primero";
+                }
 
-            }
 
-            columna.appendChild(card);
+                tarjeta.addEventListener("click", () => {
+
+                    if (!desbloqueado && !aprobadas.includes(ramo.id)) {
+                        return;
+                    }
+
+
+                    // Activar / desactivar ramo
+                    if (aprobadas.includes(ramo.id)) {
+
+                        aprobadas = aprobadas.filter(id => id !== ramo.id);
+
+                    } else {
+
+                        aprobadas.push(ramo.id);
+
+                    }
+
+
+                    localStorage.setItem(
+                        "ramosAprobados",
+                        JSON.stringify(aprobadas)
+                    );
+
+
+                    crearMalla();
+                    actualizarProgreso();
+
+                });
+
+
+                columna.appendChild(tarjeta);
+
+            });
+
+
+            contenedor.appendChild(columna);
 
         });
 
-        contenedor.appendChild(columna);
+    }
 
-    });
 
-    progreso();
 
-}
+    function actualizarProgreso() {
 
-dibujar();
+        let total = 0;
+
+        materias.forEach(semestre => {
+            total += semestre.ramos.length;
+        });
+
+
+        let porcentajeActual = Math.round(
+            (aprobadas.length / total) * 100
+        );
+
+
+        barra.style.width = porcentajeActual + "%";
+        porcentaje.textContent = porcentajeActual + "%";
+
+    }
+
+
+
+    crearMalla();
+    actualizarProgreso();
+
+});
