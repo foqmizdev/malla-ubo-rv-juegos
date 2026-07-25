@@ -27,6 +27,9 @@ header p{
     margin-bottom:20px;
 }
 
+
+/* PROGRESO */
+
 .progreso{
     width:80%;
     max-width:600px;
@@ -54,6 +57,9 @@ header p{
     font-size:18px;
 }
 
+
+/* MALLA */
+
 .contenedor{
     display:grid;
     grid-template-columns:repeat(9,1fr);
@@ -61,16 +67,21 @@ header p{
     padding:30px;
 }
 
+
 .semestre{
     background:#1e293b;
     border-radius:12px;
     padding:15px;
 }
 
+
 .semestre h2{
     text-align:center;
     margin-bottom:15px;
 }
+
+
+/* RAMOS */
 
 .ramo{
     background:#334155;
@@ -83,36 +94,52 @@ header p{
     user-select:none;
 }
 
+
 .ramo:hover{
     transform:scale(1.03);
 }
 
-.aprobado{
+
+/* RAMO APROBADO */
+
+.ramo.aprobada{
     background:#22c55e !important;
+    color:white;
 }
 
-.bloqueado{
+
+/* RAMO BLOQUEADO */
+
+.ramo.bloqueado{
     background:#475569 !important;
     opacity:.45;
     cursor:not-allowed;
 }
 
-.disponible{
+
+/* RAMO DISPONIBLE */
+
+.ramo.disponible{
     background:#2563eb;
 }
 
+
+
+/* RESPONSIVE */
+
 @media(max-width:1200px){
 
-.contenedor{
-grid-template-columns:repeat(3,1fr);
-}
+    .contenedor{
+        grid-template-columns:repeat(3,1fr);
+    }
 
 }
+
 
 @media(max-width:700px){
 
-.contenedor{
-grid-template-columns:1fr;
-}
+    .contenedor{
+        grid-template-columns:1fr;
+    }
 
 }
